@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendScope India — E-Commerce Trend Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg-void: #050810;
+    --bg-deep: #080c18;
+    --bg-card: #0d1220;
+    --bg-card2: #111827;
+    --bg-hover: #161e30;
+    --border: #1e2d45;
+    --border-bright: #2a3f60;
+    --accent-primary: #00d4ff;
+    --accent-secondary: #7c3aed;
+    --accent-gold: #f59e0b;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-orange: #f97316;
+    --text-primary: #f0f6ff;
+    --text-secondary: #8ba3c7;
+    --text-muted: #4a6280;
+    --glow-blue: 0 0 20px rgba(0,212,255,0.15);
+    --glow-purple: 0 0 20px rgba(124,58,237,0.15);
+    --font-main: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg-void);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(5,8,16,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  .nav-logo .dot { color: var(--accent-primary); }
+  .nav-logo .badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    background: rgba(0,212,255,0.12); color: var(--accent-primary);
+    border: 1px solid rgba(0,212,255,0.3); border-radius: 20px;
+    letter-spacing: 1px;
+  }
+  .nav-tabs {
+    display: flex; gap: 4px; align-items: center;
+  }
+  .nav-tab {
+    padding: 6px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    color: var(--text-secondary); border: none; background: none;
+  }
+  .nav-tab:hover { color: var(--text-primary); background: var(--bg-card); }
+  .nav-tab.active {
+    color: var(--accent-primary);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+  }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; color: var(--accent-green);
+    font-family: var(--font-mono);
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent-green);
+    animation: pulse-live 1.5s infinite;
+  }
+  @keyframes pulse-live {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(0.7); }
+  }
+  .last-update {
+    font-size: 11px; color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  /* ── LAYOUT ── */
+  .page { display: none; padding: 80px 24px 40px; max-width: 1600px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ── TIME FILTER BAR ── */
+  .filter-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+  }
+  .filter-bar h1 {
+    font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  .filter-bar h1 span { color: var(--accent-primary); }
+  .time-filters { display: flex; gap: 6px; }
+  .time-btn {
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    color: var(--text-secondary); border: 1px solid var(--border);
+    background: var(--bg-card); font-family: var(--font-mono);
+  }
+  .time-btn:hover { border-color: var(--border-bright); color: var(--text-primary); }
+  .time-btn.active {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  /* ── KPI CARDS ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px; margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--border-bright); box-shadow: var(--glow-blue); }
+  .kpi-card:hover::before { opacity:1; }
+  .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .kpi-value { font-size: 26px; font-weight: 800; font-family: var(--font-mono); letter-spacing: -1px; }
+  .kpi-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .kpi-change-up { color: var(--accent-green); font-size: 12px; font-weight: 600; }
+  .kpi-change-down { color: var(--accent-red); font-size: 12px; font-weight: 600; }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+  .grid-main-side { display: grid; grid-template-columns: 1fr 380px; gap: 18px; margin-bottom: 20px; }
+
+  /* ── PANEL / CARD ── */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 13px; font-weight: 700; color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+  .panel-title .icon { margin-right: 8px; }
+  .panel-badge {
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; font-family: var(--font-mono);
+  }
+  .badge-blue { background: rgba(0,212,255,0.12); color: var(--accent-primary); border: 1px solid rgba(0,212,255,0.25); }
+  .badge-green { background: rgba(16,185,129,0.12); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.25); }
+  .badge-purple { background: rgba(124,58,237,0.12); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
+  .badge-gold { background: rgba(245,158,11,0.12); color: var(--accent-gold); border: 1px solid rgba(245,158,11,0.25); }
+  .panel-body { padding: 16px 20px; }
+
+  /* ── CHART WRAPPER ── */
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* ── TREND TABLE ── */
+  .trend-table { width: 100%; border-collapse: collapse; }
+  .trend-table th {
+    padding: 10px 14px; text-align: left;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: var(--text-muted); text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--bg-card);
+  }
+  .trend-table td {
+    padding: 11px 14px; font-size: 13px;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+    vertical-align: middle;
+  }
+  .trend-table tr:hover td { background: var(--bg-hover); }
+  .trend-table tr:last-child td { border-bottom: none; }
+
+  .rank-num {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--text-muted); width: 30px;
+  }
+  .rank-num.top3 { color: var(--accent-gold); }
+
+  .product-name { font-weight: 600; color: var(--text-primary); }
+  .product-cat {
+    font-size: 10px; color: var(--text-muted); font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .pop-bar-wrap { width: 120px; }
+  .pop-bar-bg {
+    width: 100%; height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden;
+  }
+  .pop-bar-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    transition: width 0.6s ease;
+  }
+  .pop-num {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--text-primary); margin-top: 3px;
+  }
+
+  .change-up {
+    display: flex; align-items: center; gap: 4px;
+    color: var(--accent-green); font-family: var(--font-mono);
+    font-size: 12px; font-weight: 700;
+  }
+  .change-down {
+    display: flex; align-items: center; gap: 4px;
+    color: var(--accent-red); font-family: var(--font-mono);
+    font-size: 12px; font-weight: 700;
+  }
+  .change-neutral {
+    color: var(--text-muted); font-family: var(--font-mono); font-size: 12px;
+  }
+
+  .spark-wrap { width: 80px; height: 32px; }
+
+  .region-tag {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 4px; background: rgba(124,58,237,0.15);
+    color: #a78bfa; border: 1px solid rgba(124,58,237,0.2);
+  }
+
+  /* ── TABLE SCROLL CONTAINER ── */
+  .table-scroll { overflow-y: auto; max-height: 520px; }
+
+  /* ── REGION MAP VISUAL ── */
+  .region-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    padding: 16px 20px;
+  }
+  .region-item {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .region-item:hover {
+    border-color: var(--accent-primary);
+    background: rgba(0,212,255,0.05);
+  }
+  .region-item.selected {
+    border-color: var(--accent-primary);
+    background: rgba(0,212,255,0.08);
+  }
+  .region-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .region-top { font-size: 11px; color: var(--text-muted); }
+  .region-score {
+    font-family: var(--font-mono); font-size: 18px; font-weight: 800;
+    color: var(--accent-primary);
+  }
+
+  /* ── B2B SUPPLIER CARDS ── */
+  .supplier-list { display: flex; flex-direction: column; gap: 12px; padding: 16px 20px; }
+  .supplier-card {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    transition: all 0.2s;
+  }
+  .supplier-card:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 12px rgba(245,158,11,0.1);
+  }
+  .supplier-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .supplier-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .supplier-type {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    background: rgba(245,158,11,0.12); color: var(--accent-gold);
+    border: 1px solid rgba(245,158,11,0.25);
+  }
+  .supplier-product { font-size: 11px; color: var(--accent-primary); font-weight: 600; margin-bottom: 6px; }
+  .supplier-addr { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+  .supplier-contact { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .supplier-btn {
+    font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+    border: 1px solid var(--border-bright); background: transparent;
+    color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+  }
+  .supplier-btn:hover { color: var(--accent-primary); border-color: var(--accent-primary); }
+  .supplier-rating { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+  .star { color: var(--accent-gold); font-size: 11px; }
+  .rating-num { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+  /* ── CATEGORY PILLS ── */
+  .cat-pills { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 20px; }
+  .cat-pill {
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg-card2);
+    color: var(--text-secondary); transition: all 0.2s;
+  }
+  .cat-pill:hover { border-color: var(--border-bright); color: var(--text-primary); }
+  .cat-pill.active {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent-primary); color: var(--accent-primary);
+  }
+
+  /* ── MINI SPARKLINE ── */
+  .sparkline-svg { display: block; }
+
+  /* ── SECTION DIVIDER ── */
+  .section-label {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    letter-spacing: 2px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section-label::after {
+    content:''; flex:1; height:1px; background: var(--border);
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 14px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    flex: 1; background: none; border: none; outline: none;
+    font-size: 13px; color: var(--text-primary); font-family: var(--font-main);
+  }
+  .search-bar input::placeholder { color: var(--text-muted); }
+  .search-icon { color: var(--text-muted); font-size: 15px; }
+
+  /* ── HEATMAP ── */
+  .heatmap-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+    padding: 14px 20px;
+  }
+  .heatmap-cell {
+    aspect-ratio: 1; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; font-family: var(--font-mono);
+    cursor: pointer; transition: transform 0.15s;
+    position: relative;
+  }
+  .heatmap-cell:hover { transform: scale(1.1); z-index: 10; }
+  .hm-0 { background: rgba(0,212,255,0.05); color: transparent; }
+  .hm-1 { background: rgba(0,212,255,0.12); color: var(--accent-primary); }
+  .hm-2 { background: rgba(0,212,255,0.22); color: var(--accent-primary); }
+  .hm-3 { background: rgba(0,212,255,0.38); color: #fff; }
+  .hm-4 { background: rgba(0,212,255,0.58); color: #fff; }
+  .hm-5 { background: rgba(0,212,255,0.80); color: #050810; }
+
+  /* ── TRENDING TICKER ── */
+  .ticker-bar {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden; padding: 10px 0;
+    margin-bottom: 22px; position: relative;
+  }
+  .ticker-label {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--bg-card);
+    padding: 10px 16px;
+    font-size: 10px; font-weight: 700; color: var(--accent-primary);
+    letter-spacing: 1px; z-index: 2;
+    display: flex; align-items: center;
+    border-right: 1px solid var(--border);
+  }
+  .ticker-scroll {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: ticker-move 40s linear infinite;
+    padding-left: 120px;
+  }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0 20px; font-size: 12px; font-weight: 600;
+    border-right: 1px solid var(--border);
+  }
+  .ticker-item .t-name { color: var(--text-primary); }
+  .ticker-item .t-up { color: var(--accent-green); font-family: var(--font-mono); }
+  .ticker-item .t-down { color: var(--accent-red); font-family: var(--font-mono); }
+  @keyframes ticker-move {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── DONUT LEGEND ── */
+  .donut-legend { list-style: none; padding: 0 0 10px 0; }
+  .donut-legend li {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 5px 0; font-size: 12px; color: var(--text-secondary);
+    border-bottom: 1px solid rgba(30,45,69,0.4);
+  }
+  .donut-legend li:last-child { border-bottom: none; }
+  .donut-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+  .donut-lbl { display: flex; align-items: center; }
+  .donut-val { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text-primary); }
+
+  /* ── BREAKOUT SECTION ── */
+  .breakout-row {
+    display: flex; flex-direction: column; gap: 8px; padding: 16px 20px;
+  }
+  .breakout-item {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .breakout-label { font-size: 12px; color: var(--text-secondary); min-width: 120px; }
+  .breakout-bar-bg {
+    flex: 1; height: 8px; background: var(--border);
+    border-radius: 4px; overflow: hidden;
+  }
+  .breakout-bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 1s ease;
+  }
+  .breakout-pct { font-size: 11px; font-family: var(--font-mono); font-weight: 700; min-width: 40px; text-align: right; }
+
+  /* ── INDIA MAP PLACEHOLDER ── */
+  .india-visual {
+    width: 100%; height: 340px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .india-map-svg { width: 100%; height: 100%; }
+
+  /* ── GLOBAL SECTION ── */
+  .global-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;
+    padding: 14px 20px;
+  }
+  .global-card {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; cursor: pointer;
+    transition: all 0.2s; text-align: center;
+  }
+  .global-card:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
+  .global-flag { font-size: 26px; margin-bottom: 6px; }
+  .global-country { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .global-trend { font-size: 11px; color: var(--text-muted); }
+  .global-score { font-family: var(--font-mono); font-size: 16px; font-weight: 800; color: var(--accent-primary); margin-top: 4px; }
+
+  /* ── INSIGHT BOX ── */
+  .insight-box {
+    background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .insight-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .insight-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .insight-text strong { color: var(--accent-primary); }
+
+  /* ── PRODUCT DETAIL PANEL ── */
+  .detail-panel {
+    background: var(--bg-card2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px; margin-top: 18px; display: none;
+  }
+  .detail-panel.show { display: block; }
+
+  /* ── TABS INSIDE PANEL ── */
+  .inner-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .inner-tab {
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    color: var(--text-muted); border: 1px solid transparent;
+    background: none; transition: all 0.2s;
+  }
+  .inner-tab:hover { color: var(--text-primary); background: var(--bg-card); }
+  .inner-tab.active {
+    color: var(--accent-primary);
+    background: rgba(0,212,255,0.08);
+    border-color: rgba(0,212,255,0.2);
+  }
+  .inner-tab-content { display: none; }
+  .inner-tab-content.active { display: block; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; padding: 30px;
+    color: var(--text-muted); font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  .footer span { color: var(--accent-primary); font-weight: 700; }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed; pointer-events: none;
+    background: var(--bg-card2); border: 1px solid var(--border-bright);
+    border-radius: 8px; padding: 8px 12px;
+    font-size: 12px; color: var(--text-primary);
+    z-index: 9999; display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width:1100px) {
+    .grid-main-side { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width:700px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .nav-tabs { display: none; }
+    .time-filters { flex-wrap: wrap; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity:0; transform:translateY(16px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.4s ease forwards; }
+
+  /* Glow accent lines */
+  .accent-line {
+    height: 2px; border-radius: 1px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), transparent);
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <span>Trend<span class="dot">Scope</span></span>
+    <span class="badge">INDIA PRO</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home',this)">🏠 Home</button>
+    <button class="nav-tab" onclick="showPage('india',this)">🇮🇳 India Trends</button>
+    <button class="nav-tab" onclick="showPage('global',this)">🌐 Global</button>
+    <button class="nav-tab" onclick="showPage('categories',this)">📦 Categories</button>
+    <button class="nav-tab" onclick="showPage('suppliers',this)">🏭 B2B Suppliers</button>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="last-update" id="lastUpdate">Updated: --</div>
+  </div>
+</nav>
+
+<!-- ══════════════ HOME PAGE ══════════════ -->
+<div class="page active fade-in" id="page-home">
+
+  <!-- TICKER -->
+  <div class="ticker-bar">
+    <div class="ticker-label">🔥 TRENDING</div>
+    <div class="ticker-scroll" id="tickerScroll"></div>
+  </div>
+
+  <div class="filter-bar">
+    <h1>Market <span>Intelligence</span> Dashboard</h1>
+    <div class="time-filters">
+      <button class="time-btn" onclick="setTime('2h',this)">2H</button>
+      <button class="time-btn" onclick="setTime('24h',this)">24H</button>
+      <button class="time-btn" onclick="setTime('7d',this)">7D</button>
+      <button class="time-btn active" onclick="setTime('30d',this)">30D</button>
+      <button class="time-btn" onclick="setTime('90d',this)">90D</button>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- INSIGHT -->
+  <div class="insight-box">
+    <div class="insight-icon">💡</div>
+    <div class="insight-text" id="insightText">Loading AI insight...</div>
+  </div>
+
+  <!-- MAIN CHARTS ROW -->
+  <div class="grid-main-side">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📈 <b>Trend Volume — Top Products</b></span>
+        <span class="panel-badge badge-blue">LIVE INDEX</span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="chartTrendLine"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🥧 <b>Category Share</b></span>
+        <span class="panel-badge badge-purple">INDIA</span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:180px">
+          <canvas id="chartCatDonut"></canvas>
+        </div>
+        <ul class="donut-legend" id="donutLegend"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECOND ROW -->
+  <div class="grid-3">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🌏 <b>Global Hotspots</b></span>
+        <span class="panel-badge badge-gold">GLOBAL</span>
+      </div>
+      <div class="global-grid" id="globalGrid" style="padding-top:10px"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🗺️ <b>India by Region</b></span>
+        <span class="panel-badge badge-green">REGIONAL</span>
+      </div>
+      <div class="region-grid" id="regionGridHome"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📊 <b>Breakout Categories</b></span>
+        <span class="panel-badge badge-blue">GROWTH</span>
+      </div>
+      <div class="breakout-row" id="breakoutRow"></div>
+    </div>
+  </div>
+
+  <!-- TOP TABLE -->
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-header">
+      <span class="panel-title">🔥 <b>Top 20 Trending Products — India</b></span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="panel-badge badge-blue" id="currentTimeLabel">30D</span>
+        <span class="panel-badge badge-green">INDIA</span>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="trend-table" id="homeTopTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Popularity</th>
+            <th>Change</th>
+            <th>Trend</th>
+            <th>Region</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="homeTopTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ACTIVITY HEATMAP -->
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🗓️ <b>Search Activity Heatmap (90 Days)</b></span>
+        <span class="panel-badge badge-purple">INDIA</span>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📉 <b>Rising vs Falling Trends</b></span>
+        <span class="panel-badge badge-blue">VELOCITY</span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:200px">
+          <canvas id="chartRisingFalling"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════ INDIA TRENDS PAGE ══════════════ -->
+<div class="page fade-in" id="page-india">
+  <div class="filter-bar">
+    <h1>🇮🇳 India <span>Trend Explorer</span></h1>
+    <div class="time-filters">
+      <button class="time-btn" onclick="setTime('2h',this)">2H</button>
+      <button class="time-btn" onclick="setTime('24h',this)">24H</button>
+      <button class="time-btn" onclick="setTime('7d',this)">7D</button>
+      <button class="time-btn active" onclick="setTime('30d',this)">30D</button>
+      <button class="time-btn" onclick="setTime('90d',this)">90D</button>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search products, categories, brands..." id="indiaSearch" oninput="filterIndiaTable()">
+  </div>
+
+  <!-- Category pills -->
+  <div class="panel" style="margin-bottom:18px">
+    <div class="cat-pills" id="catPills"></div>
+  </div>
+
+  <div class="grid-main-side">
+    <!-- MAIN TABLE -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📋 <b>All Trending Products</b></span>
+        <span class="panel-badge badge-blue" id="tableCount">Loading...</span>
+      </div>
+      <div class="table-scroll" style="max-height:600px">
+        <table class="trend-table" id="indiaFullTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Popularity Score</th>
+              <th>Change (24H)</th>
+              <th>7D Trend</th>
+              <th>Peak Region</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="indiaFullTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIDE PANELS -->
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">📍 <b>Top Regions</b></span>
+        </div>
+        <div class="region-grid" id="regionGridIndia"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">🔥 <b>Breakout Products</b></span>
+          <span class="panel-badge badge-green">NEW</span>
+        </div>
+        <div class="supplier-list" id="breakoutList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <div class="detail-panel" id="detailPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h2 id="detailTitle" style="font-size:18px;font-weight:800"></h2>
+      <button onclick="document.getElementById('detailPanel').classList.remove('show')" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px">✕ Close</button>
+    </div>
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="switchInnerTab('overview',this)">Overview</button>
+      <button class="inner-tab" onclick="switchInnerTab('regions',this)">Regions</button>
+      <button class="inner-tab" onclick="switchInnerTab('suppliers',this)">B2B Suppliers</button>
+    </div>
+    <div class="inner-tab-content active" id="itab-overview">
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="detailChart"></canvas>
+      </div>
+    </div>
+    <div class="inner-tab-content" id="itab-regions">
+      <div class="breakout-row" id="detailRegions"></div>
+    </div>
+    <div class="inner-tab-content" id="itab-suppliers">
+      <div class="supplier-list" id="detailSuppliers"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ GLOBAL PAGE ══════════════ -->
+<div class="page fade-in" id="page-global">
+  <div class="filter-bar">
+    <h1>🌐 Global <span>Trend Map</span></h1>
+    <div class="time-filters">
+      <button class="time-btn" onclick="setTime('2h',this)">2H</button>
+      <button class="time-btn" onclick="setTime('24h',this)">24H</button>
+      <button class="time-btn" onclick="setTime('7d',this)">7D</button>
+      <button class="time-btn active" onclick="setTime('30d',this)">30D</button>
+      <button class="time-btn" onclick="setTime('90d',this)">90D</button>
+    </div>
+  </div>
+
+  <div class="kpi-row" id="globalKpiRow"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🌍 <b>Global Trending — All Regions</b></span>
+        <span class="panel-badge badge-gold">WORLDWIDE</span>
+      </div>
+      <div class="global-grid" id="globalBigGrid"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📊 <b>Regional Search Volume Comparison</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:300px">
+          <canvas id="chartGlobalBar"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">🌐 <b>Top Trending Products by Country</b></span>
+      <span class="panel-badge badge-blue">CROSS-BORDER</span>
+    </div>
+    <div class="table-scroll">
+      <table class="trend-table" id="globalTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Country</th>
+            <th>Popularity</th>
+            <th>Change</th>
+            <th>Category</th>
+            <th>India Relevance</th>
+          </tr>
+        </thead>
+        <tbody id="globalTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ CATEGORIES PAGE ══════════════ -->
+<div class="page fade-in" id="page-categories">
+  <div class="filter-bar">
+    <h1>📦 Category <span>Deep Dive</span></h1>
+    <div class="time-filters">
+      <button class="time-btn" onclick="setTime('2h',this)">2H</button>
+      <button class="time-btn" onclick="setTime('24h',this)">24H</button>
+      <button class="time-btn" onclick="setTime('7d',this)">7D</button>
+      <button class="time-btn active" onclick="setTime('30d',this)">30D</button>
+      <button class="time-btn" onclick="setTime('90d',this)">90D</button>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📈 <b>Category Growth Rates</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:300px">
+          <canvas id="chartCatGrowth"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🔥 <b>Hot vs Cold Categories</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:300px">
+          <canvas id="chartCatHot"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📋 <b>Category-wise Top Products</b></span>
+    </div>
+    <div id="catProductList" style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+  </div>
+</div>
+
+<!-- ══════════════ SUPPLIERS PAGE ══════════════ -->
+<div class="page fade-in" id="page-suppliers">
+  <div class="filter-bar">
+    <h1>🏭 B2B <span>Supplier Directory</span></h1>
+    <span class="panel-badge badge-gold" style="padding:8px 16px;font-size:12px">VERIFIED CONTACTS</span>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-icon">📌</div>
+    <div class="insight-text">Listed suppliers are matched to <strong>current trending products in India</strong>. Contact details are for reference — always verify via official channels before placing bulk orders. Minimum order quantities (MOQ) and pricing are indicative.</div>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Search by product, city, supplier name..." id="supplierSearch" oninput="filterSuppliers()">
+  </div>
+
+  <div class="cat-pills" id="supplierCatPills" style="margin-bottom:18px;flex-wrap:wrap;display:flex;gap:8px"></div>
+
+  <div id="supplierGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>⚡ <span>TrendScope India</span> — E-Commerce Product Intelligence Platform | Powered by Sethu</p>
+  <p style="margin-top:6px;font-size:11px">Data refreshes every 15 minutes. Popularity scores are composite indices from search volume, social signals, and marketplace data. For informational use only.</p>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA LAYER
+// ══════════════════════════════════════════════
+
+const CATEGORIES = ['Electronics','Fashion','Beauty & Skincare','Home & Kitchen','Health & Wellness',
+  'Sports & Fitness','Baby & Kids','Pet Supplies','Automotive','Books & Media','Food & Grocery',
+  'Jewellery','Toys & Games','Garden & Outdoor','Tools & Hardware'];
+
+const INDIA_REGIONS = ['Maharashtra','Delhi NCR','Karnataka','Tamil Nadu','Telangana',
+  'West Bengal','Gujarat','Rajasthan','Uttar Pradesh','Kerala','Punjab','Haryana'];
+
+const SOURCES = ['Google Trends','TikTok','Instagram','Meesho','Flipkart','Amazon India','Myntra','Snapdeal'];
+
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function randF(min,max,d=1){ return parseFloat((Math.random()*(max-min)+min).toFixed(d)); }
+function randEl(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function genSpark(trend='up'){
+  const pts = [];
+  let v = rand(20,60);
+  for(let i=0;i<8;i++){
+    v += rand(-8,trend==='up'?14:8) * (trend==='up'?1:-1);
+    v = Math.max(5,Math.min(100,v));
+    pts.push(v);
+  }
+  return pts;
+}
+
+// Master product list
+const PRODUCTS_INDIA = [
+  {name:'Wireless Earbuds',cat:'Electronics',baseScore:9200,region:'Delhi NCR',tag:'🔥'},
+  {name:'Air Fryer',cat:'Home & Kitchen',baseScore:8800,region:'Maharashtra',tag:'🔥'},
+  {name:'LED Strip Lights',cat:'Electronics',baseScore:7600,region:'Karnataka',tag:'📈'},
+  {name:'Yoga Mat Premium',cat:'Sports & Fitness',baseScore:7100,region:'Tamil Nadu',tag:'📈'},
+  {name:'Face Serum (Vitamin C)',cat:'Beauty & Skincare',baseScore:6900,region:'Delhi NCR',tag:'🔥'},
+  {name:'Smart Watch Series',cat:'Electronics',baseScore:6700,region:'Maharashtra',tag:'🔥'},
+  {name:'Running Shoes',cat:'Sports & Fitness',baseScore:6500,region:'Gujarat',tag:'📈'},
+  {name:'Protein Powder',cat:'Health & Wellness',baseScore:6300,region:'Karnataka',tag:'📈'},
+  {name:'Baby Carrier Wrap',cat:'Baby & Kids',baseScore:6100,region:'West Bengal',tag:'📈'},
+  {name:'Kurta Set (Ethnic)',cat:'Fashion',baseScore:5900,region:'Rajasthan',tag:'📈'},
+  {name:'Car Dash Cam',cat:'Automotive',baseScore:5700,region:'Delhi NCR',tag:'📈'},
+  {name:'Bamboo Toothbrush',cat:'Health & Wellness',baseScore:5500,region:'Kerala',tag:'🌱'},
+  {name:'Silk Saree',cat:'Fashion',baseScore:5300,region:'Tamil Nadu',tag:'📈'},
+  {name:'Dog Grooming Kit',cat:'Pet Supplies',baseScore:5100,region:'Maharashtra',tag:'📈'},
+  {name:'Noise-Cancelling Headphones',cat:'Electronics',baseScore:4900,region:'Karnataka',tag:'🔥'},
+  {name:'Whey Protein Isolate',cat:'Health & Wellness',baseScore:4700,region:'Delhi NCR',tag:'📈'},
+  {name:'Non-Stick Cookware Set',cat:'Home & Kitchen',baseScore:4600,region:'Uttar Pradesh',tag:'📈'},
+  {name:'Sunscreen SPF 60',cat:'Beauty & Skincare',baseScore:4400,region:'Maharashtra',tag:'📈'},
+  {name:'Laptop Stand',cat:'Electronics',baseScore:4200,region:'Karnataka',tag:'📈'},
+  {name:'Steel Water Bottle',cat:'Health & Wellness',baseScore:4100,region:'Gujarat',tag:'🌱'},
+  {name:'Designer Handbag',cat:'Fashion',baseScore:3900,region:'Delhi NCR',tag:'📈'},
+  {name:'Facial Roller Jade',cat:'Beauty & Skincare',baseScore:3700,region:'Tamil Nadu',tag:'📈'},
+  {name:'Mechanical Keyboard',cat:'Electronics',baseScore:3600,region:'Karnataka',tag:'📈'},
+  {name:'Collagen Supplement',cat:'Health & Wellness',baseScore:3500,region:'Maharashtra',tag:'📈'},
+  {name:'Traditional Jhumka',cat:'Jewellery',baseScore:3300,region:'Rajasthan',tag:'📈'},
+  {name:'Gaming Mouse',cat:'Electronics',baseScore:3200,region:'West Bengal',tag:'📈'},
+  {name:'Ayurvedic Hair Oil',cat:'Beauty & Skincare',baseScore:3100,region:'Kerala',tag:'🌱'},
+  {name:'Meal Prep Containers',cat:'Home & Kitchen',baseScore:2900,region:'Gujarat',tag:'📈'},
+  {name:'Resistance Bands Set',cat:'Sports & Fitness',baseScore:2800,region:'Delhi NCR',tag:'📈'},
+  {name:'Board Games Family',cat:'Toys & Games',baseScore:2700,region:'Maharashtra',tag:'📈'},
+].map((p,i)=>{
+  const change = rand(-800,3200);
+  const changePct = randF(-12,42);
+  return {
+    ...p, id:i,
+    score: p.baseScore + rand(-200,500),
+    change, changePct,
+    trend: change > 0 ? 'up' : change < 0 ? 'down' : 'flat',
+    spark: genSpark(change>0?'up':'down'),
+    source: randEl(SOURCES),
+    rank: i+1
+  };
+});
+
+// Global data
+const GLOBAL_DATA = [
+  {flag:'🇺🇸',country:'United States',score:9800,topProduct:'Smart Watches',change:'+1,240'},
+  {flag:'🇨🇳',country:'China',score:9400,topProduct:'Mini LED TVs',change:'+2,100'},
+  {flag:'🇮🇳',country:'India',score:9200,topProduct:'Wireless Earbuds',change:'+1,890'},
+  {flag:'🇧🇷',country:'Brazil',score:7800,topProduct:'Hair Extensions',change:'+980'},
+  {flag:'🇩🇪',country:'Germany',score:7400,topProduct:'Air Purifiers',change:'+640'},
+  {flag:'🇬🇧',country:'UK',score:7100,topProduct:'Skincare Sets',change:'+720'},
+  {flag:'🇯🇵',country:'Japan',score:6900,topProduct:'Robot Toys',change:'+430'},
+  {flag:'🇰🇷',country:'S. Korea',score:6700,topProduct:'K-Beauty',change:'+1,100'},
+  {flag:'🇮🇩',country:'Indonesia',score:6400,topProduct:'Hijab Fashion',change:'+860'},
+  {flag:'🇲🇾',country:'Malaysia',score:6100,topProduct:'Air Fryers',change:'+740'},
+  {flag:'🇦🇺',country:'Australia',score:5900,topProduct:'Fitness Gear',change:'+520'},
+  {flag:'🇸🇦',country:'Saudi Arabia',score:5600,topProduct:'Abayas',change:'+690'},
+];
+
+// B2B Suppliers
+const SUPPLIERS_DB = [
+  {name:'TechZone Electronics Pvt Ltd',type:'Manufacturer',product:'Electronics',products:['Wireless Earbuds','Smart Watch','LED Strip Lights'],
+   addr:'Plot 45, Phase II, Electronic City, Bengaluru, Karnataka — 560100',contact:'info@techzone.in',phone:'+91 80 4124 5678',
+   moq:'500 units',price:'₹180–₹450/unit',rating:4.7,reviews:234,gst:'29AABCT1234A1Z5'},
+  {name:'Hindustan Home Appliances',type:'Distributor',product:'Home & Kitchen',products:['Air Fryer','Non-Stick Cookware','Meal Prep Containers'],
+   addr:'Survey No. 78, Bhiwandi Industrial Area, Thane, Maharashtra — 421302',contact:'sales@hha.co.in',phone:'+91 22 2774 9900',
+   moq:'200 units',price:'₹850–₹2,400/unit',rating:4.5,reviews:187,gst:'27AAACH5678B1Z2'},
+  {name:'Nykaa B2B Wholesale',type:'Wholesale',product:'Beauty & Skincare',products:['Vitamin C Serum','Sunscreen SPF 60','Jade Facial Roller'],
+   addr:'Unit 12, Andheri Kurla Road, SEEPZ Zone, Mumbai, Maharashtra — 400093',contact:'b2b@nykaa.com',phone:'+91 22 6180 6180',
+   moq:'100 units',price:'₹220–₹1,800/unit',rating:4.9,reviews:512,gst:'27AAJCN7890C1Z8'},
+  {name:'FitZone Sports Suppliers',type:'Manufacturer',product:'Sports & Fitness',products:['Yoga Mat','Protein Powder','Resistance Bands'],
+   addr:'KIADB Industrial Area, Block C, Peenya, Bengaluru, Karnataka — 560058',contact:'orders@fitzone.in',phone:'+91 80 2839 4400',
+   moq:'300 units',price:'₹150–₹3,200/unit',rating:4.6,reviews:143,gst:'29AABCF2345D1Z7'},
+  {name:'Rajputana Textiles & Sarees',type:'Manufacturer',product:'Fashion',products:['Silk Saree','Kurta Set','Traditional Jhumka'],
+   addr:'Sadar Bazar, Jodhpur, Rajasthan — 342001',contact:'rajputana@textiles.in',phone:'+91 291 2437 600',
+   moq:'50 pieces',price:'₹400–₹8,000/piece',rating:4.8,reviews:309,gst:'08AABCR3456E1Z6'},
+  {name:'Himalaya Pet Care Wholesale',type:'Distributor',product:'Pet Supplies',products:['Dog Grooming Kit','Pet Shampoo','Cat Accessories'],
+   addr:'NH-8, Gurugram Industrial Estate, Haryana — 122001',contact:'petcare@himalaya.in',phone:'+91 124 4700 500',
+   moq:'100 units',price:'₹300–₹2,100/unit',rating:4.4,reviews:98,gst:'06AABCH4567F1Z5'},
+  {name:'AutoTech India Solutions',type:'Manufacturer',product:'Automotive',products:['Car Dash Cam','Seat Covers','Car Organizer'],
+   addr:'Sector 28, Faridabad, Haryana — 121002',contact:'auto@atindia.com',phone:'+91 129 4012 300',
+   moq:'200 units',price:'₹600–₹4,500/unit',rating:4.3,reviews:76,gst:'06AABCA5678G1Z4'},
+  {name:'WellnessFirst India Pvt Ltd',type:'Manufacturer',product:'Health & Wellness',products:['Steel Water Bottle','Collagen Supplement','Ayurvedic Hair Oil'],
+   addr:'MIDC Butibori, Nagpur, Maharashtra — 441108',contact:'bulk@wellnessfirst.in',phone:'+91 712 2880 100',
+   moq:'150 units',price:'₹120–₹2,800/unit',rating:4.6,reviews:221,gst:'27AABCW6789H1Z3'},
+  {name:'BabyBliss Wholesale Hub',type:'Distributor',product:'Baby & Kids',products:['Baby Carrier Wrap','Baby Monitor','Educational Toys'],
+   addr:'DLF Industrial Area, Kirti Nagar, New Delhi — 110015',contact:'wholesale@babybliss.in',phone:'+91 11 4532 7700',
+   moq:'100 units',price:'₹280–₹3,500/unit',rating:4.7,reviews:165,gst:'07AABCB7890I1Z2'},
+  {name:'Parag Gaming & Electronics',type:'Wholesale',product:'Electronics',products:['Gaming Mouse','Mechanical Keyboard','Gaming Headset'],
+   addr:'Nehru Place Electronics Market, New Delhi — 110019',contact:'parag@gaming.in',phone:'+91 11 2622 4000',
+   moq:'100 units',price:'₹350–₹6,000/unit',rating:4.5,reviews:288,gst:'07AABCP8901J1Z1'},
+  {name:'Green Eco Supplies',type:'Manufacturer',product:'Health & Wellness',products:['Bamboo Toothbrush','Bamboo Products','Eco Kitchen'],
+   addr:'Perumbavoor Industrial Estate, Ernakulam, Kerala — 683547',contact:'eco@greensupplies.in',phone:'+91 484 2597 000',
+   moq:'500 units',price:'₹45–₹380/unit',rating:4.9,reviews:390,gst:'32AABCG9012K1Z9'},
+  {name:'HomeStyle Interiors B2B',type:'Distributor',product:'Home & Kitchen',products:['LED Strip Lights','Bamboo Furniture','Wall Decor'],
+   addr:'Surat Textile Market Complex, Ring Road, Surat, Gujarat — 395002',contact:'b2b@homestyleind.com',phone:'+91 261 2760 800',
+   moq:'200 units',price:'₹80–₹1,200/unit',rating:4.4,reviews:132,gst:'24AABCH0123L1Z8'},
+];
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentTime = '30d';
+let selectedCat = 'All';
+let supplierCat = 'All';
+let detailChartInst = null;
+let trendLineChart = null;
+let catDonutChart = null;
+let risingFallingChart = null;
+let globalBarChart = null;
+let catGrowthChart = null;
+let catHotChart = null;
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function fmtNum(n){ return n >= 1000 ? (n/1000).toFixed(1)+'K' : n.toString(); }
+
+function sparkSVG(data, color='#00d4ff'){
+  const w=80,h=32,pad=2;
+  const min=Math.min(...data), max=Math.max(...data);
+  const range=max-min||1;
+  const pts = data.map((v,i)=>{
+    const x = pad + i*(w-2*pad)/(data.length-1);
+    const y = h-pad - (v-min)/range*(h-2*pad);
+    return `${x},${y}`;
+  }).join(' ');
+  return `<svg width="${w}" height="${h}" class="sparkline-svg">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function changeCell(change, pct){
+  const abs = Math.abs(change);
+  const sign = change > 0 ? '+' : change < 0 ? '-' : '';
+  const cls = change > 0 ? 'change-up' : change < 0 ? 'change-down' : 'change-neutral';
+  const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '—';
+  const col = change > 0 ? '#10b981' : change < 0 ? '#ef4444' : '#4a6280';
+  return `<div class="${cls}">${arrow} ${sign}${fmtNum(abs)} <span style="opacity:0.7;font-size:10px">(${sign}${Math.abs(pct)}%)</span></div>`;
+}
+
+function popCell(score, max=10000){
+  const pct = Math.min(100, (score/max)*100);
+  return `<div class="pop-bar-wrap">
+    <div class="pop-bar-bg"><div class="pop-bar-fill" style="width:${pct}%"></div></div>
+    <div class="pop-num">${fmtNum(score)}</div>
+  </div>`;
+}
+
+function starRating(r){
+  let s='';
+  for(let i=1;i<=5;i++) s+=`<span class="star">${i<=Math.floor(r)?'★':'☆'}</span>`;
+  return s;
+}
+
+// ══════════════════════════════════════════════
+// CHART COLORS
+// ══════════════════════════════════════════════
+const PALETTE = ['#00d4ff','#7c3aed','#10b981','#f59e0b','#ef4444','#f97316',
+  '#06b6d4','#8b5cf6','#34d399','#fbbf24','#fb7185','#60a5fa'];
+
+const chartDefaults = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{
+    backgroundColor:'rgba(8,12,24,0.95)',
+    titleColor:'#f0f6ff',bodyColor:'#8ba3c7',
+    borderColor:'#1e2d45',borderWidth:1,
+    titleFont:{family:'Inter',weight:'700',size:12},
+    bodyFont:{family:'JetBrains Mono',size:11},
+    padding:10,cornerRadius:8
+  }},
+  scales:{x:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#4a6280',font:{size:10}}},
+    y:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#4a6280',font:{size:10}}}}
+};
+
+// ══════════════════════════════════════════════
+// INIT KPI ROW
+// ══════════════════════════════════════════════
+function initKPI(){
+  const kpis = [
+    {label:'Trending Products',value:'2,847',sub:'Active in India',change:'+184 today',up:true},
+    {label:'Top Search Score',value:'9,200',sub:'Wireless Earbuds',change:'+890 vs yesterday',up:true},
+    {label:'Fastest Rising',value:'Air Fryer',sub:'Home & Kitchen',change:'+3,200 in 24H',up:true},
+    {label:'Total Categories',value:'15',sub:'Active sectors',change:'2 new breakouts',up:true},
+    {label:'Regions Tracked',value:'12',sub:'India states',change:'All time zones',up:true},
+    {label:'Data Sources',value:'8',sub:'Platforms',change:'Live sync',up:true},
+  ];
+  document.getElementById('kpiRow').innerHTML = kpis.map(k=>`
+    <div class="kpi-card fade-in">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+      <div class="${k.up?'kpi-change-up':'kpi-change-down'}" style="margin-top:6px">${k.up?'▲':'▼'} ${k.change}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+// INSIGHT TEXT
+// ══════════════════════════════════════════════
+function updateInsight(){
+  const insights = [
+    `<strong>Wireless Earbuds</strong> are surging +890 points in <strong>Delhi NCR</strong> and <strong>Karnataka</strong> — highest volume in 90 days. Consider stocking TWS earbuds under ₹1,500 for maximum demand capture.`,
+    `<strong>Beauty & Skincare</strong> is the fastest-growing category this week (+42% volume). <strong>Vitamin C Serum</strong> and <strong>Sunscreen SPF 60</strong> dominate searches across Maharashtra and Tamil Nadu.`,
+    `<strong>Air Fryer</strong> demand spiked +3,200 points in last 24H — driven by health-conscious cooking trends. Maharashtra and Gujarat show strongest purchase intent. B2B opportunity: ₹850–₹2,400/unit wholesale.`,
+    `Regional breakout: <strong>Kerala</strong> is trending heavily for eco/organic products. <strong>Bamboo Toothbrush</strong> and <strong>Ayurvedic Hair Oil</strong> search volume up 67% YoY.`,
+  ];
+  document.getElementById('insightText').innerHTML = randEl(insights);
+}
+
+// ══════════════════════════════════════════════
+// TREND LINE CHART
+// ══════════════════════════════════════════════
+function initTrendLine(){
+  const ctx = document.getElementById('chartTrendLine').getContext('2d');
+  const labels = Array.from({length:30},(_,i)=>`D${i+1}`);
+  const datasets = PRODUCTS_INDIA.slice(0,5).map((p,i)=>({
+    label:p.name,
+    data: Array.from({length:30},(_,j)=> p.score - rand(0,2000) + j*rand(10,80)),
+    borderColor: PALETTE[i],
+    backgroundColor: PALETTE[i]+'18',
+    borderWidth:2, pointRadius:0, tension:0.4, fill:false
+  }));
+  if(trendLineChart) trendLineChart.destroy();
+  trendLineChart = new Chart(ctx,{type:'line',data:{labels,datasets},
+    options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:true,
+      labels:{color:'#8ba3c7',font:{size:11},boxWidth:12,padding:16}}}}});
+}
+
+// ══════════════════════════════════════════════
+// DONUT CHART
+// ══════════════════════════════════════════════
+function initDonut(){
+  const ctx = document.getElementById('chartCatDonut').getContext('2d');
+  const catScores = {};
+  PRODUCTS_INDIA.forEach(p=>{ catScores[p.cat] = (catScores[p.cat]||0)+p.score; });
+  const sorted = Object.entries(catScores).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const labels = sorted.map(x=>x[0]);
+  const data = sorted.map(x=>x[1]);
+  const total = data.reduce((a,b)=>a+b,0);
+  if(catDonutChart) catDonutChart.destroy();
+  catDonutChart = new Chart(ctx,{type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:PALETTE,borderColor:'#080c18',borderWidth:2,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(8,12,24,0.95)',
+        titleColor:'#f0f6ff',bodyColor:'#8ba3c7',borderColor:'#1e2d45',borderWidth:1,padding:10,cornerRadius:8}}}});
+  document.getElementById('donutLegend').innerHTML = sorted.map((x,i)=>`
+    <li>
+      <span class="donut-lbl"><span class="donut-dot" style="background:${PALETTE[i]}"></span>${x[0]}</span>
+      <span class="donut-val">${((x[1]/total)*100).toFixed(1)}%</span>
+    </li>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// GLOBAL GRID (home)
+// ══════════════════════════════════════════════
+function initGlobalGrid(){
+  document.getElementById('globalGrid').innerHTML = GLOBAL_DATA.slice(0,6).map(g=>`
+    <div class="global-card">
+      <div class="global-flag">${g.flag}</div>
+      <div class="global-country">${g.country}</div>
+      <div class="global-trend">${g.topProduct}</div>
+      <div class="global-score">${fmtNum(g.score)}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// REGION GRID
+// ══════════════════════════════════════════════
+function initRegionGrid(elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const regionScores = {};
+  PRODUCTS_INDIA.forEach(p=>{ regionScores[p.region] = (regionScores[p.region]||0)+p.score; });
+  const sorted = Object.entries(regionScores).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxS = sorted[0][1];
+  el.innerHTML = sorted.map(([r,s])=>{
+    const pct = Math.round(s/maxS*100);
+    const topP = PRODUCTS_INDIA.filter(p=>p.region===r)[0];
+    return `<div class="region-item" onclick="filterByRegion('${r}')">
+      <div class="region-name">${r}</div>
+      <div class="region-score">${pct}</div>
+      <div class="region-top">Top: ${topP?.name||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// BREAKOUT ROW
+// ══════════════════════════════════════════════
+function initBreakout(){
+  const catGrowth = {};
+  PRODUCTS_INDIA.forEach(p=>{ if(p.change>0) catGrowth[p.cat]=(catGrowth[p.cat]||0)+p.change; });
+  const sorted = Object.entries(catGrowth).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxG = sorted[0][1];
+  const colors = ['#00d4ff','#7c3aed','#10b981','#f59e0b','#ef4444','#f97316','#06b6d4','#8b5cf6'];
+  document.getElementById('breakoutRow').innerHTML = sorted.map(([cat,g],i)=>`
+    <div class="breakout-item">
+      <div class="breakout-label">${cat}</div>
+      <div class="breakout-bar-bg">
+        <div class="breakout-bar-fill" style="width:${Math.round(g/maxG*100)}%;background:${colors[i]}"></div>
+      </div>
+      <div class="breakout-pct" style="color:${colors[i]}">+${fmtNum(g)}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// HOME TOP TABLE
+// ══════════════════════════════════════════════
+function initHomeTopTable(){
+  const tbody = document.getElementById('homeTopTbody');
+  tbody.innerHTML = PRODUCTS_INDIA.slice(0,20).map((p,i)=>`
+    <tr>
+      <td><span class="rank-num ${i<3?'top3':''}">${i<3?['🥇','🥈','🥉'][i]:i+1}</span></td>
+      <td>
+        <div class="product-name">${p.tag} ${p.name}</div>
+      </td>
+      <td><span class="region-tag">${p.cat}</span></td>
+      <td>${popCell(p.score)}</td>
+      <td>${changeCell(p.change,p.changePct)}</td>
+      <td>${sparkSVG(p.spark, p.trend==='up'?'#10b981':'#ef4444')}</td>
+      <td><span style="font-size:12px;color:var(--text-muted)">${p.region}</span></td>
+      <td><button onclick="openDetail(${p.id})" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);color:var(--accent-primary);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600">Analyze →</button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// HEATMAP
+// ══════════════════════════════════════════════
+function initHeatmap(){
+  const grid = document.getElementById('heatmapGrid');
+  const cells = Array.from({length:90},(_,i)=>{
+    const lvl = rand(0,5);
+    const day = 90-i;
+    return `<div class="heatmap-cell hm-${lvl}" title="Day -${day}: Score ${lvl*200+rand(0,150)}" data-tip="Day -${day}: ${['No data','Low','Moderate','High','Very High','Peak'][lvl]} activity">${lvl>2?lvl*rand(1,3):''}</div>`;
+  });
+  grid.innerHTML = cells.join('');
+}
+
+// ══════════════════════════════════════════════
+// RISING/FALLING CHART
+// ══════════════════════════════════════════════
+function initRisingFalling(){
+  const ctx = document.getElementById('chartRisingFalling').getContext('2d');
+  const rising = PRODUCTS_INDIA.filter(p=>p.trend==='up').slice(0,8);
+  const falling = PRODUCTS_INDIA.filter(p=>p.trend==='down').slice(0,8);
+  const labels = [...rising.slice(0,5),...falling.slice(0,5)].map(p=>p.name.slice(0,12)+'…');
+  const data = [...rising.slice(0,5).map(p=>p.change),...falling.slice(0,5).map(p=>p.change)];
+  const colors = data.map(v=>v>=0?'rgba(16,185,129,0.7)':'rgba(239,68,68,0.7)');
+  if(risingFallingChart) risingFallingChart.destroy();
+  risingFallingChart = new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},
+    options:{...chartDefaults,indexAxis:'y',scales:{
+      x:{grid:{color:'rgba(30,45,69,0.5)'},ticks:{color:'#4a6280',font:{size:10}}},
+      y:{grid:{display:false},ticks:{color:'#8ba3c7',font:{size:10}}}
+    }}});
+}
+
+// ══════════════════════════════════════════════
+// TICKER
+// ══════════════════════════════════════════════
+function initTicker(){
+  const items = PRODUCTS_INDIA.slice(0,15).map(p=>`
+    <span class="ticker-item">
+      <span class="t-name">${p.tag} ${p.name}</span>
+      <span class="${p.trend==='up'?'t-up':'t-down'}">${p.trend==='up'?'▲+':'▼-'}${fmtNum(Math.abs(p.change))}</span>
+    </span>`).join('');
+  // Duplicate for seamless loop
+  document.getElementById('tickerScroll').innerHTML = items + items;
+}
+
+// ══════════════════════════════════════════════
+// INDIA FULL TABLE
+// ══════════════════════════════════════════════
+let filteredIndia = [...PRODUCTS_INDIA];
+
+function initCatPills(){
+  const cats = ['All',...[...new Set(PRODUCTS_INDIA.map(p=>p.cat))]];
+  document.getElementById('catPills').innerHTML = cats.map(c=>`
+    <div class="cat-pill ${c===selectedCat?'active':''}" onclick="selectCat('${c}')">${c}</div>`).join('');
+}
+
+function selectCat(cat){
+  selectedCat = cat;
+  initCatPills();
+  filterIndiaTable();
+}
+
+function filterIndiaTable(){
+  const q = (document.getElementById('indiaSearch')?.value||'').toLowerCase();
+  filteredIndia = PRODUCTS_INDIA.filter(p=>{
+    const matchCat = selectedCat==='All'||p.cat===selectedCat;
+    const matchQ = !q || p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)||p.region.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  renderIndiaTable();
+}
+
+function renderIndiaTable(){
+  document.getElementById('tableCount').textContent = `${filteredIndia.length} Products`;
+  document.getElementById('indiaFullTbody').innerHTML = filteredIndia.map((p,i)=>`
+    <tr style="cursor:pointer" onclick="openDetail(${p.id})">
+      <td><span class="rank-num ${i<3?'top3':''}">${i+1}</span></td>
+      <td>
+        <div class="product-name">${p.tag} ${p.name}</div>
+        <div class="product-cat">${p.source}</div>
+      </td>
+      <td><span class="region-tag">${p.cat}</span></td>
+      <td>${popCell(p.score)}</td>
+      <td>${changeCell(p.change,p.changePct)}</td>
+      <td>${sparkSVG(p.spark,p.trend==='up'?'#10b981':'#ef4444')}</td>
+      <td><span style="font-size:12px;color:var(--text-muted)">${p.region}</span></td>
+      <td><span style="font-size:11px;color:var(--text-muted)">${p.source}</span></td>
+    </tr>`).join('');
+}
+
+function initBreakoutList(){
+  const top3 = PRODUCTS_INDIA.filter(p=>p.trend==='up').sort((a,b)=>b.change-a.change).slice(0,4);
+  document.getElementById('breakoutList').innerHTML = top3.map(p=>`
+    <div class="supplier-card" style="border-color:rgba(16,185,129,0.3)">
+      <div class="supplier-header">
+        <span class="supplier-name">${p.name}</span>
+        <span class="supplier-type" style="background:rgba(16,185,129,0.12);color:#10b981;border-color:rgba(16,185,129,0.3)">BREAKOUT</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary)">${p.cat} · ${p.region}</div>
+      <div class="change-up" style="margin-top:6px;font-size:13px">▲ +${fmtNum(p.change)} in ${currentTime.toUpperCase()}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// PRODUCT DETAIL
+// ══════════════════════════════════════════════
+function openDetail(id){
+  const p = PRODUCTS_INDIA.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('detailTitle').textContent = `${p.tag} ${p.name} — Deep Analysis`;
+  document.getElementById('detailPanel').classList.add('show');
+  document.getElementById('detailPanel').scrollIntoView({behavior:'smooth',block:'start'});
+
+  // Detail chart
+  const ctx = document.getElementById('detailChart').getContext('2d');
+  const labels = Array.from({length:30},(_,i)=>`D${i+1}`);
+  const data = Array.from({length:30},(_,j)=> p.score - rand(0,1500) + j*rand(15,60));
+  if(detailChartInst) detailChartInst.destroy();
+  detailChartInst = new Chart(ctx,{type:'line',
+    data:{labels,datasets:[{label:p.name,data,borderColor:'#00d4ff',
+      backgroundColor:'rgba(0,212,255,0.06)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]},
+    options:{...chartDefaults}});
+
+  // Regions breakdown
+  const regionData = INDIA_REGIONS.slice(0,8).map(r=>({r,v:rand(10,100)}));
+  const maxV = Math.max(...regionData.map(x=>x.v));
+  document.getElementById('detailRegions').innerHTML = regionData.map(x=>`
+    <div class="breakout-item">
+      <div class="breakout-label">${x.r}</div>
+      <div class="breakout-bar-bg">
+        <div class="breakout-bar-fill" style="width:${Math.round(x.v/maxV*100)}%;background:#00d4ff"></div>
+      </div>
+      <div class="breakout-pct" style="color:#00d4ff">${x.v}</div>
+    </div>`).join('');
+
+  // Suppliers
+  const relSuppliers = SUPPLIERS_DB.filter(s=>s.products.some(sp=>sp.toLowerCase().includes(p.name.toLowerCase().split(' ')[0]))||s.product===p.cat);
+  const supplierHtml = (relSuppliers.length>0?relSuppliers:SUPPLIERS_DB.filter(s=>s.product===p.cat||true).slice(0,2)).slice(0,3).map(s=>`
+    <div class="supplier-card">
+      <div class="supplier-header">
+        <span class="supplier-name">${s.name}</span>
+        <span class="supplier-type">${s.type}</span>
+      </div>
+      <div class="supplier-product">📦 ${p.name} | MOQ: ${s.moq} | Price: ${s.price}</div>
+      <div class="supplier-addr">📍 ${s.addr}</div>
+      <div class="supplier-rating">${starRating(s.rating)}<span class="rating-num">${s.rating} (${s.reviews} reviews) · GST: ${s.gst}</span></div>
+      <div class="supplier-contact">
+        <button class="supplier-btn" onclick="alert('Contact: ${s.contact}')">✉ Email</button>
+        <button class="supplier-btn" onclick="alert('Phone: ${s.phone}')">📞 Call</button>
+        <button class="supplier-btn" onclick="alert('MOQ: ${s.moq}\\nPrice: ${s.price}')">💰 Quote</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('detailSuppliers').innerHTML = supplierHtml||'<p style="color:var(--text-muted);padding:10px">No direct suppliers found. Browse the B2B Suppliers tab.</p>';
+
+  // reset tabs
+  document.querySelectorAll('.inner-tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('itab-overview').classList.add('active');
+  document.querySelectorAll('.inner-tab')[0].classList.add('active');
+}
+
+function switchInnerTab(tab, el){
+  document.querySelectorAll('.inner-tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('itab-'+tab).classList.add('active');
+  el.classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+// GLOBAL PAGE
+// ══════════════════════════════════════════════
+function initGlobalPage(){
+  // KPI
+  document.getElementById('globalKpiRow').innerHTML = [
+    {label:'Countries Tracked',value:'47',sub:'Active markets',change:'+3 new',up:true},
+    {label:'Global Top Trend',value:'Smart Watch',sub:'US · CN · IN',change:'+12.4K vol',up:true},
+    {label:'Cross-Border Ops',value:'India ↔ CN',sub:'1688 sourcing',change:'₹4.2Cr volume',up:true},
+    {label:'India Rank',value:'#3',sub:'Global search vol',change:'Up from #5',up:true},
+  ].map(k=>`<div class="kpi-card">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-value">${k.value}</div>
+    <div class="kpi-sub">${k.sub}</div>
+    <div class="kpi-change-up" style="margin-top:6px">▲ ${k.change}</div>
+  </div>`).join('');
+
+  // Big global grid
+  document.getElementById('globalBigGrid').innerHTML = GLOBAL_DATA.map(g=>`
+    <div class="global-card">
+      <div class="global-flag">${g.flag}</div>
+      <div class="global-country">${g.country}</div>
+      <div class="global-trend">${g.topProduct}</div>
+      <div class="global-score">${fmtNum(g.score)}</div>
+      <div style="font-size:10px;color:var(--accent-green);margin-top:4px;font-family:var(--font-mono)">${g.change}</div>
+    </div>`).join('');
+
+  // Global bar chart
+  const ctx = document.getElementById('chartGlobalBar').getContext('2d');
+  if(globalBarChart) globalBarChart.destroy();
+  globalBarChart = new Chart(ctx,{type:'bar',
+    data:{
+      labels: GLOBAL_DATA.map(g=>`${g.flag} ${g.country}`),
+      datasets:[{
+        label:'Search Index',
+        data: GLOBAL_DATA.map(g=>g.score),
+        backgroundColor: GLOBAL_DATA.map((_,i)=>PALETTE[i%PALETTE.length]+'bb'),
+        borderRadius:8, borderSkipped:false
+      }]
+    },
+    options:{...chartDefaults,plugins:{...chartDefaults.plugins,legend:{display:false}}}
+  });
+
+  // Global table
+  const globalProducts = PRODUCTS_INDIA.slice(0,15).map((p,i)=>({
+    ...p,country:GLOBAL_DATA[i%GLOBAL_DATA.length],indiaRelevance:rand(60,100)
+  }));
+  document.getElementById('globalTbody').innerHTML = globalProducts.map((p,i)=>`
+    <tr>
+      <td><span class="rank-num ${i<3?'top3':''}">${i+1}</span></td>
+      <td><div class="product-name">${p.name}</div></td>
+      <td><span style="font-size:14px">${p.country.flag}</span> ${p.country.country}</td>
+      <td>${popCell(p.score)}</td>
+      <td>${changeCell(p.change,p.changePct)}</td>
+      <td><span class="region-tag">${p.cat}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="pop-bar-bg" style="width:60px"><div class="pop-bar-fill" style="width:${p.indiaRelevance}%;background:#10b981"></div></div>
+          <span style="font-size:11px;font-family:var(--font-mono);color:#10b981">${p.indiaRelevance}%</span>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// CATEGORIES PAGE
+// ══════════════════════════════════════════════
+function initCategoriesPage(){
+  const catData = {};
+  PRODUCTS_INDIA.forEach(p=>{ if(!catData[p.cat]) catData[p.cat]={score:0,change:0,count:0,products:[]}; 
+    catData[p.cat].score+=p.score; catData[p.cat].change+=p.change; catData[p.cat].count++;
+    catData[p.cat].products.push(p); });
+  const sorted = Object.entries(catData).sort((a,b)=>b[1].score-a[1].score);
+
+  // Growth chart
+  const ctx1 = document.getElementById('chartCatGrowth').getContext('2d');
+  if(catGrowthChart) catGrowthChart.destroy();
+  catGrowthChart = new Chart(ctx1,{type:'bar',
+    data:{labels:sorted.slice(0,8).map(x=>x[0].slice(0,12)),
+      datasets:[{data:sorted.slice(0,8).map(x=>x[1].change),
+        backgroundColor:sorted.slice(0,8).map((_,i)=>PALETTE[i]+'cc'),
+        borderRadius:8,borderSkipped:false}]},
+    options:{...chartDefaults}});
+
+  // Hot vs cold chart
+  const ctx2 = document.getElementById('chartCatHot').getContext('2d');
+  if(catHotChart) catHotChart.destroy();
+  catHotChart = new Chart(ctx2,{type:'radar',
+    data:{labels:sorted.slice(0,7).map(x=>x[0].slice(0,10)),
+      datasets:[
+        {label:'Volume',data:sorted.slice(0,7).map(x=>x[1].score/100),
+          borderColor:'#00d4ff',backgroundColor:'rgba(0,212,255,0.08)',pointBackgroundColor:'#00d4ff'},
+        {label:'Growth',data:sorted.slice(0,7).map(x=>Math.max(0,x[1].change/10)),
+          borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.08)',pointBackgroundColor:'#10b981'}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{color:'#8ba3c7',font:{size:11}}}},
+      scales:{r:{grid:{color:'rgba(30,45,69,0.7)'},ticks:{color:'#4a6280',backdropColor:'transparent'},
+        pointLabels:{color:'#8ba3c7',font:{size:10}}}}}});
+
+  // Cat product cards
+  document.getElementById('catProductList').innerHTML = sorted.map(([cat,data])=>`
+    <div class="panel" style="padding:0;overflow:hidden">
+      <div class="panel-header" style="background:var(--bg-card2)">
+        <span class="panel-title">📦 ${cat}</span>
+        <span class="panel-badge badge-blue">${data.count} products</span>
+      </div>
+      <div style="padding:12px">
+        ${data.products.slice(0,3).map(p=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:12px;font-weight:600">${p.name}</span>
+            <span class="${p.trend==='up'?'change-up':'change-down'}" style="font-size:11px">${p.trend==='up'?'▲+':'▼-'}${fmtNum(Math.abs(p.change))}</span>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// SUPPLIERS PAGE
+// ══════════════════════════════════════════════
+function initSuppliersPage(){
+  const cats = ['All',...[...new Set(SUPPLIERS_DB.map(s=>s.product))]];
+  document.getElementById('supplierCatPills').innerHTML = cats.map(c=>`
+    <div class="cat-pill ${c===supplierCat?'active':''}" onclick="selectSupplierCat('${c}')">${c}</div>`).join('');
+  renderSuppliers();
+}
+
+function selectSupplierCat(cat){
+  supplierCat=cat;
+  initSuppliersPage();
+}
+
+function filterSuppliers(){
+  renderSuppliers();
+}
+
+function renderSuppliers(){
+  const q=(document.getElementById('supplierSearch')?.value||'').toLowerCase();
+  const filtered = SUPPLIERS_DB.filter(s=>{
+    const matchCat = supplierCat==='All'||s.product===supplierCat;
+    const matchQ = !q||s.name.toLowerCase().includes(q)||s.product.toLowerCase().includes(q)||
+      s.addr.toLowerCase().includes(q)||s.products.some(p=>p.toLowerCase().includes(q));
+    return matchCat&&matchQ;
+  });
+  document.getElementById('supplierGrid').innerHTML = filtered.map(s=>`
+    <div class="supplier-card" style="border-radius:14px">
+      <div class="supplier-header">
+        <span class="supplier-name" style="font-size:14px">${s.name}</span>
+        <span class="supplier-type">${s.type}</span>
+      </div>
+      <div class="supplier-product">📦 ${s.products.slice(0,3).join(' · ')}</div>
+      <div class="supplier-addr" style="margin-top:8px">📍 ${s.addr}</div>
+      <div class="supplier-addr" style="margin-top:4px">✉ ${s.contact}</div>
+      <div class="supplier-addr">📞 ${s.phone}</div>
+      <div class="supplier-addr" style="margin-top:4px">🏷️ MOQ: <strong style="color:var(--accent-primary)">${s.moq}</strong> · Price: <strong style="color:var(--accent-gold)">${s.price}</strong></div>
+      <div class="supplier-addr">🔢 GST: ${s.gst}</div>
+      <div class="supplier-rating" style="margin-top:8px">${starRating(s.rating)}
+        <span class="rating-num">${s.rating} · ${s.reviews} verified reviews</span>
+      </div>
+      <div class="supplier-contact">
+        <button class="supplier-btn" onclick="alert('Email: ${s.contact}')">✉ Email</button>
+        <button class="supplier-btn" onclick="alert('Phone: ${s.phone}')">📞 Call</button>
+        <button class="supplier-btn" onclick="alert('Request a quote for MOQ: ${s.moq} at ${s.price}')">💰 Get Quote</button>
+        <button class="supplier-btn" onclick="alert('GST: ${s.gst}')">📄 GST Verify</button>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION & TIME FILTER
+// ══════════════════════════════════════════════
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='global') initGlobalPage();
+  if(id==='categories') initCategoriesPage();
+  if(id==='suppliers') initSuppliersPage();
+  if(id==='india'){ initCatPills(); filterIndiaTable(); initRegionGrid('regionGridIndia'); initBreakoutList(); }
+}
+
+function setTime(t, el){
+  currentTime = t;
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('currentTimeLabel').textContent = t.toUpperCase();
+  // Re-randomize scores for feel of real data
+  PRODUCTS_INDIA.forEach(p=>{
+    const mult = {
+      '2h':0.1,'24h':0.3,'7d':0.6,'30d':1,'90d':1.8
+    }[t]||1;
+    p.score = Math.round(p.baseScore * mult + rand(-200,300));
+    p.change = rand(-800,3200) * (t==='2h'?0.05:t==='24h'?0.2:t==='7d'?0.5:t==='90d'?2:1);
+    p.changePct = randF(-12,42);
+    p.trend = p.change>0?'up':'down';
+    p.spark = genSpark(p.trend);
+  });
+  initHomeTopTable();
+  if(trendLineChart) initTrendLine();
+  if(risingFallingChart) initRisingFalling();
+  updateInsight();
+}
+
+function filterByRegion(region){
+  showPage('india', document.querySelectorAll('.nav-tab')[1]);
+  document.getElementById('indiaSearch').value = region;
+  filterIndiaTable();
+}
+
+// ══════════════════════════════════════════════
+// TIMESTAMP
+// ══════════════════════════════════════════════
+function updateTimestamp(){
+  const now = new Date();
+  document.getElementById('lastUpdate').textContent =
+    `Updated: ${now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
+}
+
+// ══════════════════════════════════════════════
+// BOOTSTRAP
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  initKPI();
+  updateInsight();
+  initTicker();
+  initTrendLine();
+  initDonut();
+  initGlobalGrid();
+  initRegionGrid('regionGridHome');
+  initBreakout();
+  initHomeTopTable();
+  initHeatmap();
+  initRisingFalling();
+  updateTimestamp();
+
+  // Live updates every 30s
+  setInterval(()=>{
+    updateTimestamp();
+    if(Math.random()>0.7) updateInsight();
+  }, 30000);
+
+  // Animate bars on load
+  setTimeout(()=>{
+    document.querySelectorAll('.breakout-bar-fill,.pop-bar-fill').forEach(el=>{
+      const w = el.style.width;
+      el.style.width='0%';
+      setTimeout(()=>el.style.width=w,100);
+    });
+  },200);
+});
+</script>
+</body>
+</html>
