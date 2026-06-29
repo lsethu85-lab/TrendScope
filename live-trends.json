@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "lastUpdated": "2026-06-28T20:24:08+08:00",
+    "refreshIntervalMinutes": 30,
+    "mode": "sample-json",
+    "sources": [
+      "sample",
+      "youtube_ready"
+    ],
+    "note": "Replace this with GitHub Actions generated JSON."
+  },
+  "products": [
+    {
+      "id": "IND-1001",
+      "name": "Vitamin C Face Serum",
+      "category": "Beauty & Personal Care",
+      "region": "Tamil Nadu",
+      "customerSegment": "Beauty Buyers",
+      "source": "Sample JSON",
+      "price": 499,
+      "sourceSignals": {
+        "googleTrendScore": 72,
+        "youtubeMentions": 3,
+        "youtubeViews": 25100,
+        "youtubeLikes": 900,
+        "youtubeComments": 122,
+        "youtubeVelocity": 62,
+        "youtubeScore": 74,
+        "redditMentions": 0,
+        "newsMentions": 0,
+        "marketplaceListings": 185
+      },
+      "metrics": {
+        "searchVolumeEstimate": 23800,
+        "growth3m": 28,
+        "growth6m": 64,
+        "growth1y": 118,
+        "purchaseIntent": 86,
+        "competitionRisk": 48,
+        "supplierReadiness": 82,
+        "estimatedRevenue": 412000
+      },
+      "scores": {
+        "trendScore": 84,
+        "indiaFitScore": 88,
+        "supplierMatchScore": 82,
+        "youtubeScore": 74,
+        "beforeCompetitorScore": 86
+      },
+      "keywords": {
+        "google": [
+          "vitamin c face serum price in india",
+          "best vitamin c serum"
+        ],
+        "amazon": [
+          "buy vitamin c serum",
+          "vitamin c serum best seller"
+        ],
+        "flipkart": [
+          "vitamin c serum lowest price",
+          "vitamin c serum offers"
+        ]
+      },
+      "suppliers": [
+        {
+          "name": "Nykaa B2B Wholesale",
+          "city": "Mumbai",
+          "region": "Maharashtra",
+          "category": "Beauty",
+          "moq": 100,
+          "deliveryDays": 4,
+          "paymentTerms": "Net 30",
+          "rating": 4.9,
+          "matchScore": 91
+        }
+      ],
+      "social": {
+        "youtube": {
+          "score": 74,
+          "velocity": 62,
+          "topVideos": []
+        }
+      },
+      "live": {
+        "deltaPercent": 12,
+        "status": "rising",
+        "detectedAt": "2026-06-28T20:24:08+08:00",
+        "updatedAt": "2026-06-28T20:24:08+08:00"
+      }
+    }
+  ]
+}
